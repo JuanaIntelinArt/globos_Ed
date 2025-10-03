@@ -1,0 +1,223 @@
+:root {
+    --color-pizarra: #386047; /* Verde pizarra oscura */
+    --color-tiza: #ffffff;
+    --color-fondo: #f0f0f0;
+    --color-rosa: #ffb6c1;
+    --color-verde: #90ee90;
+    --color-azul: #add8e6;
+    --color-amarillo: #ffff99;
+    --color-violeta: #dda0dd;
+    --color-plomo: #c0c0c0;
+    --color-mostaza: #ffdb58;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--color-fondo);
+    font-family: 'Arial', sans-serif;
+    overflow: hidden; /* Previene barras de desplazamiento */
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-pizarra);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5) inset;
+}
+
+/* --- ESTILO DE PIZARRA --- */
+
+#chalkboard-message {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3em;
+    font-family: 'Permanent Marker', cursive; /* Idealmente una fuente de tiza */
+    color: var(--color-tiza);
+    opacity: 0.7;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+#target-area {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-height: 50px;
+    width: 80%;
+    border-bottom: 3px dashed var(--color-tiza);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+    padding-bottom: 10px;
+    z-index: 5;
+}
+
+/* --- ESTILO DE TORTA --- */
+
+#cake-area {
+    position: absolute;
+    bottom: 70px;
+    right: 100px; /* Posición cerca de donde van las letras */
+    z-index: 2;
+}
+
+.cake {
+    width: 100px;
+    height: 120px;
+    position: relative;
+    transform: scale(0.8);
+}
+
+.layer {
+    width: 100%;
+    height: 30px;
+    background: #ff69b4; /* Rosado */
+    border-radius: 5px;
+    position: absolute;
+    box-shadow: 0 5px 0 0 #c71585; /* Cereza oscura */
+}
+.layer-1 { bottom: 0; }
+.layer-2 { bottom: 30px; width: 90%; left: 5%; background: #ff4500; /* Naranja rojizo */ }
+.layer-3 { bottom: 60px; width: 80%; left: 10%; background: #ffd700; /* Dorado */ }
+
+.candle {
+    width: 5px;
+    height: 25px;
+    background: var(--color-tiza);
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    box-shadow: 0 0 5px #ffa500;
+}
+.candle::after {
+    content: '🔥';
+    position: absolute;
+    top: -15px;
+    left: -5px;
+    font-size: 1.2em;
+}
+
+
+/* --- ESTILO DE GLOBOS --- */
+
+#balloon-area {
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    top: 0;
+}
+
+.balloon {
+    position: absolute;
+    width: 100px;
+    height: 120px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s ease-out;
+    animation: float 8s ease-in-out infinite alternate;
+    z-index: 10;
+}
+
+/* Animación de Flotación */
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(2deg); }
+    100% { transform: translateY(0) rotate(-2deg); }
+}
+
+.balloon:hover {
+    transform: scale(1.05) translateY(-5px);
+}
+
+.balloon-content {
+    color: #333;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px var(--color-tiza);
+    user-select: none;
+}
+
+/* Colores de los globos */
+.color-rosa { background-color: var(--color-rosa); }
+.color-verde { background-color: var(--color-verde); }
+.color-azul { background-color: var(--color-azul); }
+.color-amarillo { background-color: var(--color-amarillo); }
+.color-violeta { background-color: var(--color-violeta); }
+.color-plomo { background-color: var(--color-plomo); }
+.color-mostaza { background-color: var(--color-mostaza); }
+
+/* --- ESTILO DE LETRAS CAÍDAS Y ARRASTRABLES --- */
+
+.draggable-letter {
+    position: absolute; /* Inicialmente para la caída */
+    font-size: 2.5em;
+    font-weight: 900;
+    color: var(--color-tiza);
+    cursor: grab;
+    transition: transform 0.5s ease-out, top 1s ease-in; /* Transición para la caída */
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+    z-index: 20;
+    user-select: none;
+    font-family: 'Permanent Marker', cursive;
+}
+
+.dropping {
+    /* La animación de caída será controlada por JS cambiando la posición 'top' */
+}
+
+.draggable-letter:active {
+    cursor: grabbing;
+    z-index: 30; /* Asegura que la letra arrastrada esté encima */
+}
+
+/* Estilo de la letra en la posición correcta */
+.target-letter {
+    position: relative; /* Cambia a relativo para que se acomode en el flexbox */
+    cursor: default;
+    /* Se mantienen los otros estilos de fuente y color */
+    transform: none !important;
+    top: 0 !important;
+}
+
+/* --- MENSAJE DE VICTORIA --- */
+
+#win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px 50px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    font-size: 4em;
+    color: #ff6347; /* Rojo Tomate */
+    font-weight: bold;
+    border: 5px solid #ff4500;
+    box-shadow: 0 0 30px #ff4500;
+    z-index: 100;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Importar una fuente tipo tiza para mejor estética */
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');

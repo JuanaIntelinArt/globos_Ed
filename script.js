@@ -15,17 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const winMessage = document.getElementById('win-message');
     const winImage = document.getElementById('win-image'); 
     const birthdayAudio = document.getElementById('birthday-audio'); 
+    const startButtonOverlay = document.getElementById('start-button-overlay');
+    const startGameButton = document.getElementById('start-game-button');
+    
     const CORRECT_MESSAGE = "Happy Birthday Ed 40!";
     let placedLetters = Array(balloonData.length).fill(null);
     let activeDrag = null;
 
-    // Intentar reproducir audio automáticamente
-    birthdayAudio.volume = 0.5;
-    birthdayAudio.play().catch(e => {
-        console.log("No se pudo reproducir el audio automáticamente. Requiere interacción del usuario.", e);
-        // Si falla, el usuario escuchará el audio al interactuar con la página
+    // --- Lógica de Inicio y Audio ---
+    startGameButton.addEventListener('click', () => {
+        // Intentar reproducir audio (ahora que hay interacción del usuario)
+        birthdayAudio.volume = 0.5;
+        birthdayAudio.play().catch(e => {
+            console.warn("Error al intentar reproducir audio:", e);
+        });
+        
+        // Ocultar la pantalla de inicio
+        startButtonOverlay.classList.add('hidden');
     });
-
 
     /**
      * Función para crear y posicionar un globo.
@@ -36,20 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
         balloon.dataset.text = data.text;
         balloon.dataset.order = data.correctOrder;
 
-        // Posición aleatoria
         const x = Math.random() * 75 + 5; 
         const y = Math.random() * 40 + 5; 
 
         balloon.style.left = `${x}vw`;
         balloon.style.top = `${y}vh`;
 
-        // Contenido del globo (texto oculto por CSS)
         const content = document.createElement('div');
         content.classList.add('balloon-content');
         content.textContent = data.text;
         balloon.appendChild(content);
 
-        // Evento de clic para "explotar" y soltar la letra
         balloon.addEventListener('click', () => dropLetter(balloon, data.text));
         
         balloonArea.appendChild(balloon);
@@ -71,25 +75,19 @@ document.addEventListener('DOMContentLoaded', () => {
             letter.dataset.text = balloon.dataset.text;
             letter.dataset.order = balloon.dataset.order;
 
-            // Posición inicial de la letra caída (donde estaba el globo)
             letter.style.left = `${rect.left}px`;
             letter.style.top = `${rect.top}px`;
             
             document.body.appendChild(letter);
             
-            // Animación de caída
             setTimeout(() => {
-                // Leer la posición real del targetArea (que está ahora a altura media)
                 const targetRect = targetArea.getBoundingClientRect();
-                
-                // La letra cae justo encima de la línea punteada del targetArea
                 const dropY = targetRect.top - letter.offsetHeight; 
 
                 letter.style.top = `${dropY}px`;
                 letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)';
                 letter.style.zIndex = 20;
 
-                // Después de la caída, habilitar el arrastre
                 letter.addEventListener('transitionend', () => {
                     letter.classList.remove('dropping');
                     makeDraggable(letter);
@@ -107,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startDrag(e) {
-        e.preventDefault();
+        e.preventDefault(); // Mantenemos el preventDefault aquí para evitar la selección de texto
         
         const element = e.currentTarget;
         activeDrag = element;
@@ -131,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.touches[0].clientY;
+        const clientY = e.clientY || e.touches[0].clientY;
         
         activeDrag.style.left = `${clientX - activeDrag.offsetX}px`;
         activeDrag.style.top = `${clientY - activeDrag.offsetY}px`;
@@ -140,10 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function endDrag(e) {
         if (!activeDrag) return;
         
+        // **IMPORTANTE:** Quitamos e.preventDefault() aquí para permitir que la letra se reubique en el flexbox.
+        
         const targetRect = targetArea.getBoundingClientRect();
         const letterRect = activeDrag.getBoundingClientRect();
 
-        // Chequeo de colisión simple
         const isOverTarget = (
             letterRect.bottom > targetRect.top &&
             letterRect.top < targetRect.bottom &&
@@ -157,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
             activeDrag.style.zIndex = 20;
         }
 
-        // Limpiar los listeners
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('mouseup', endDrag);
@@ -171,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function placeLetterInTarget(letterElement) {
         const orderIndex = parseInt(letterElement.dataset.order);
         
-        // Manejo de duplicados
         if (placedLetters.includes(letterElement)) {
             const oldIndex = placedLetters.indexOf(letterElement);
             placedLetters[oldIndex] = null;
@@ -179,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         placedLetters[orderIndex] = letterElement;
         
-        // Ajuste visual
+        // Estilo para acomodar la letra en el contenedor flexbox
         letterElement.style.position = 'relative';
         letterElement.style.top = '0';
         letterElement.style.left = '0';
@@ -190,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         letterElement.removeEventListener('mousedown', startDrag);
         letterElement.removeEventListener('touchstart', startDrag);
 
-        // Reconstruir el targetArea
+        // Reconstruir el targetArea para el orden correcto
         targetArea.innerHTML = '';
         placedLetters.forEach(letter => {
             if (letter) {
@@ -208,15 +205,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const fullMessageArray = placedLetters.map(l => l ? l.dataset.text : '').filter(Boolean);
         const currentMessage = fullMessageArray.join('');
 
-        // Solo chequear si tenemos todas las partes
         if (fullMessageArray.length === balloonData.length) {
             if (currentMessage === CORRECT_MESSAGE.replace(/\s/g, '')) {
                 winMessage.classList.remove('hidden');
                 winImage.classList.remove('hidden');
                 targetArea.style.borderBottom = '3px solid gold';
-                
-                // Opcional: pausar la música
-                // birthdayAudio.pause(); 
+                birthdayAudio.pause(); // Pausamos el audio de fondo
             }
         }
     }

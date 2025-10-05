@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let placedLetters = Array(balloonData.length).fill(null);
     let activeDrag = null;
 
-    // --- Lógica de Inicio y Audio ---
+    // --- Lógica de Inicio y Audio Mejorada ---
     startGameButton.addEventListener('click', () => {
-        // Intentar reproducir audio (ahora que hay interacción del usuario)
+        // Intentar reproducir audio con la interacción del usuario
         birthdayAudio.volume = 0.5;
         birthdayAudio.play().catch(e => {
             console.warn("Error al intentar reproducir audio:", e);
@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         balloon.dataset.text = data.text;
         balloon.dataset.order = data.correctOrder;
 
+        // Posicionamiento de los globos
         const x = Math.random() * 75 + 5; 
         const y = Math.random() * 40 + 5; 
 
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const content = document.createElement('div');
         content.classList.add('balloon-content');
-        content.textContent = data.text;
+        content.textContent = data.text; // Texto visible de nuevo
         balloon.appendChild(content);
 
         balloon.addEventListener('click', () => dropLetter(balloon, data.text));
@@ -66,28 +67,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function dropLetter(balloon, text) {
         if (!balloon.classList.contains('popped')) {
             balloon.classList.add('popped');
-            balloon.style.display = 'none';
             
+            // Crear el elemento de letra que cae
             const rect = balloon.getBoundingClientRect();
-
             const letter = document.createElement('div');
             letter.classList.add('draggable-letter', 'dropping');
             letter.textContent = text;
             letter.dataset.text = balloon.dataset.text;
             letter.dataset.order = balloon.dataset.order;
 
+            // Posicionar la letra donde estaba el globo
             letter.style.left = `${rect.left}px`;
             letter.style.top = `${rect.top}px`;
-            
             document.body.appendChild(letter);
             
+            // Animación de caída
             setTimeout(() => {
                 const targetRect = targetArea.getBoundingClientRect();
                 const dropY = targetRect.top - letter.offsetHeight; 
 
                 letter.style.top = `${dropY}px`;
-                letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)';
-                letter.style.zIndex = 60; // Asegura que la letra esté encima
+                letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)'; // Animación de caída
+                letter.style.zIndex = 60; 
 
                 letter.addEventListener('transitionend', () => {
                     letter.classList.remove('dropping');
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const clientY = e.clientY || e.touches[0].clientY;
         
         element.offsetX = clientX - element.getBoundingClientRect().left;
-        element.offsetY = clientY - element.getBoundingClientRect().top;
+        element.offsetY = clientY - clientY; 
         
         document.addEventListener('mousemove', drag);
         document.addEventListener('touchmove', drag);
@@ -138,8 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endDrag(e) {
         if (!activeDrag) return;
-        
-        // **IMPORTANTE:** Aquí no usamos preventDefault para permitir que el elemento se reubique.
         
         const targetRect = targetArea.getBoundingClientRect();
         const letterRect = activeDrag.getBoundingClientRect();
@@ -170,11 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function placeLetterInTarget(letterElement) {
         const orderIndex = parseInt(letterElement.dataset.order);
         
+        // Si la letra ya estaba colocada, la quitamos de su posición anterior
         if (placedLetters.includes(letterElement)) {
             const oldIndex = placedLetters.indexOf(letterElement);
             placedLetters[oldIndex] = null;
         }
 
+        // Colocamos la letra en su posición nueva/correcta
         placedLetters[orderIndex] = letterElement;
         
         // Estilo para acomodar la letra en el contenedor flexbox
@@ -182,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         letterElement.style.top = '0';
         letterElement.style.left = '0';
         letterElement.style.transform = 'none';
-        letterElement.style.zIndex = 5; // Más bajo para ser parte del target
+        letterElement.style.zIndex = 5; 
         letterElement.classList.add('target-letter');
         
         letterElement.removeEventListener('mousedown', startDrag);
@@ -203,10 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
      * Revisa si el mensaje completo es correcto.
      */
     function checkWinCondition() {
+        // Obtenemos el mensaje actual uniendo las letras en el orden del array
         const fullMessageArray = placedLetters.map(l => l ? l.dataset.text : '').filter(Boolean);
         const currentMessage = fullMessageArray.join('');
 
         if (fullMessageArray.length === balloonData.length) {
+            // Compara el mensaje sin espacios
             if (currentMessage === CORRECT_MESSAGE.replace(/\s/g, '')) {
                 winMessage.classList.remove('hidden');
                 winImage.classList.remove('hidden');

@@ -32,7 +32,6 @@ body {
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.5) inset;
-    /* Z-index implícito: 0 (es el fondo) */
 }
 
 /* --- Botón de Inicio (Debe ser el MÁS ALTO) --- */
@@ -46,7 +45,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* EL MÁS ALTO PARA CUBRIR TODO */
+    z-index: 1000; 
 }
 
 #start-game-button {
@@ -93,16 +92,16 @@ body {
     align-items: flex-end;
     gap: 10px;
     padding-bottom: 10px;
-    z-index: 50; /* Debe estar sobre la torta para recibir las letras */
+    z-index: 50; 
 }
 
-/* --- ESTILO DE TORTA MEJORADO (VISIBILIDAD CORREGIDA) --- */
+/* --- ESTILO DE TORTA MEJORADO --- */
 
 #cake-area {
     position: absolute;
     bottom: 20%; 
     right: 10%; 
-    z-index: 10; /* Asegura que se vea sobre el fondo */
+    z-index: 10; 
     perspective: 1000px; 
 }
 
@@ -138,35 +137,83 @@ body {
     100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-/* --- ESTILO DE GLOBOS (VISIBILIDAD CORREGIDA) --- */
+/* --- ESTILO DE GLOBOS (TEXTO VISIBLE) --- */
 
 #balloon-area {
     position: absolute;
     width: 100%;
     height: 70%;
     top: 0;
-    z-index: 30; /* Asegura que los globos estén sobre la torta */
+    z-index: 30; 
 }
 
 .balloon {
-    /* ... otros estilos ... */
-    z-index: 35; /* Un poco más alto que el área */
+    background-color: var(--color-rosa);
+    width: 100px;
+    height: 120px;
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: inset -10px -10px 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.1s ease;
+    z-index: 35;
 }
 
-/* OCULTA EL TEXTO DEL GLOBO */
+/* ESTILO DEL TEXTO VUELVE A SER VISIBLE */
 .balloon-content {
-    color: transparent; 
+    color: var(--color-tiza); /* Color blanco para el texto */
     font-size: 1.5em;
     font-weight: bold;
-    text-shadow: none; 
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5); /* Sombra para que se vea mejor */
     user-select: none;
 }
 
-/* --- ESTILO DE LETRAS CAÍDAS Y ARRASTRABLES (CON VOLUMEN) --- */
+.balloon:active {
+    transform: scale(0.95);
+}
+
+.balloon.popped {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+/* Colores individuales de globos */
+.color-rosa { background-color: var(--color-rosa); }
+.color-verde { background-color: var(--color-verde); }
+.color-azul { background-color: var(--color-azul); }
+.color-amarillo { background-color: var(--color-amarillo); }
+.color-violeta { background-color: var(--color-violeta); }
+.color-plomo { background-color: var(--color-plomo); }
+.color-mostaza { background-color: var(--color-mostaza); }
+
+/* --- ESTILO DE LETRAS CAÍDAS Y ARRASTRABLES --- */
 
 .draggable-letter {
-    /* ... otros estilos ... */
-    z-index: 60; /* MÁS ALTO para arrastrar sobre todo */
+    width: auto;
+    padding: 5px 10px;
+    background-color: var(--color-tiza);
+    border: 3px solid var(--color-pizarra);
+    border-radius: 8px;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 2em;
+    color: var(--color-pizarra);
+    cursor: grab;
+    z-index: 60;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.draggable-letter.target-letter {
+    cursor: default;
+    z-index: 5;
+    box-shadow: none;
+}
+
+.draggable-letter.dropping {
+    cursor: default;
+    transition: none; 
 }
 
 /* --- MENSAJE DE VICTORIA (SOLO IMAGEN) --- */
@@ -182,7 +229,7 @@ body {
     border-radius: 15px;
     border: 5px solid gold;
     box-shadow: 0 0 30px #ff4500;
-    z-index: 900; /* ALTO, debajo del overlay de inicio */
+    z-index: 900; 
     display: flex;
     justify-content: center;
     align-items: center;

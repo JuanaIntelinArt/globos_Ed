@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startButtonOverlay.classList.add('hidden');
     });
 
+
     /**
      * Función para crear y posicionar un globo.
      */
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 letter.style.top = `${dropY}px`;
                 letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)';
-                letter.style.zIndex = 20;
+                letter.style.zIndex = 60; // Asegura que la letra esté encima
 
                 letter.addEventListener('transitionend', () => {
                     letter.classList.remove('dropping');
@@ -105,12 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startDrag(e) {
-        e.preventDefault(); // Mantenemos el preventDefault aquí para evitar la selección de texto
+        e.preventDefault(); 
         
         const element = e.currentTarget;
         activeDrag = element;
         element.style.position = 'absolute'; 
-        element.style.zIndex = 30; 
+        element.style.zIndex = 70; // Al arrastrar, más alto aún
         
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
@@ -138,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function endDrag(e) {
         if (!activeDrag) return;
         
-        // **IMPORTANTE:** Quitamos e.preventDefault() aquí para permitir que la letra se reubique en el flexbox.
+        // **IMPORTANTE:** Aquí no usamos preventDefault para permitir que el elemento se reubique.
         
         const targetRect = targetArea.getBoundingClientRect();
         const letterRect = activeDrag.getBoundingClientRect();
@@ -153,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isOverTarget) {
             placeLetterInTarget(activeDrag);
         } else {
-            activeDrag.style.zIndex = 20;
+            activeDrag.style.zIndex = 60;
         }
 
         document.removeEventListener('mousemove', drag);
@@ -181,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         letterElement.style.top = '0';
         letterElement.style.left = '0';
         letterElement.style.transform = 'none';
-        letterElement.style.zIndex = 5;
+        letterElement.style.zIndex = 5; // Más bajo para ser parte del target
         letterElement.classList.add('target-letter');
         
         letterElement.removeEventListener('mousedown', startDrag);
@@ -210,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 winMessage.classList.remove('hidden');
                 winImage.classList.remove('hidden');
                 targetArea.style.borderBottom = '3px solid gold';
-                birthdayAudio.pause(); // Pausamos el audio de fondo
+                birthdayAudio.pause();
             }
         }
     }

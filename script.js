@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const content = document.createElement('div');
         content.classList.add('balloon-content');
-        content.textContent = data.text; // Texto visible de nuevo
+        content.textContent = data.text; 
         balloon.appendChild(content);
 
         balloon.addEventListener('click', () => dropLetter(balloon, data.text));
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dropY = targetRect.top - letter.offsetHeight; 
 
                 letter.style.top = `${dropY}px`;
-                letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)'; // Animación de caída
+                letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)'; 
                 letter.style.zIndex = 60; 
 
                 letter.addEventListener('transitionend', () => {
@@ -112,13 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const element = e.currentTarget;
         activeDrag = element;
         element.style.position = 'absolute'; 
-        element.style.zIndex = 70; // Al arrastrar, más alto aún
+        element.style.zIndex = 70; 
         
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
         
         element.offsetX = clientX - element.getBoundingClientRect().left;
-        element.offsetY = clientY - clientY; 
+        element.offsetY = clientY - element.getBoundingClientRect().top; 
         
         document.addEventListener('mousemove', drag);
         document.addEventListener('touchmove', drag);

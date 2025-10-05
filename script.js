@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Crear el elemento de letra
             const rect = balloon.getBoundingClientRect();
             const letter = document.createElement('div');
-            letter.classList.add('draggable-letter'); // Sin clase 'dropping'
+            letter.classList.add('draggable-letter');
             letter.textContent = text;
             letter.dataset.text = balloon.dataset.text;
             letter.dataset.order = balloon.dataset.order;
@@ -79,13 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
             letter.style.top = `${rect.top}px`;
             document.body.appendChild(letter);
             
-            // Iniciar el arrastre inmediatamente desde la posición del clic
+            // Iniciar el arrastre inmediatamente
             startDrag({
                 clientX: e.clientX,
                 clientY: e.clientY,
                 currentTarget: letter,
-                preventDefault: () => {} // Simula un evento válido
-            }, true); // El segundo argumento indica que es un inicio de arrastre forzado
+                preventDefault: () => {} 
+            }, true); 
         }
     }
 
@@ -103,14 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const element = e.currentTarget;
         activeDrag = element;
         element.style.position = 'absolute'; 
-        element.style.zIndex = 70; // Al arrastrar, más alto aún
+        element.style.zIndex = 70; 
         
         const clientX = e.clientX || e.touches?.[0].clientX;
         const clientY = e.clientY || e.touches?.[0].clientY;
         
-        // Si es un inicio forzado (después de clic en globo), la letra comienza exactamente en el cursor.
-        // Si es un arrastre normal, calculamos el offset para evitar saltos.
         if (isForcedStart) {
+            // Centra la letra bajo el cursor al inicio
             element.offsetX = element.offsetWidth / 2;
             element.offsetY = element.offsetHeight / 2;
         } else {
@@ -123,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', endDrag);
         document.addEventListener('touchend', endDrag);
 
-        // Mueve la letra a la posición inicial del cursor inmediatamente
         if (isForcedStart) {
             drag(e);
         }
@@ -146,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetRect = targetArea.getBoundingClientRect();
         const letterRect = activeDrag.getBoundingClientRect();
 
-        // Lógica de colisión: comprueba si al menos una parte de la letra está sobre el target
         const isOverTarget = (
             letterRect.bottom > targetRect.top &&
             letterRect.top < targetRect.bottom &&
@@ -157,10 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isOverTarget) {
             placeLetterInTarget(activeDrag);
         } else {
-            // Si se suelta fuera, sigue siendo arrastrable (position: absolute)
             activeDrag.style.zIndex = 60;
-            // Si la soltamos fuera, aseguramos que la letra pueda volverse a arrastrar
-            makeDraggable(activeDrag);
+            makeDraggable(activeDrag); // Sigue siendo arrastrable si se suelta fuera
         }
 
         document.removeEventListener('mousemove', drag);
@@ -176,24 +171,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function placeLetterInTarget(letterElement) {
         const orderIndex = parseInt(letterElement.dataset.order);
         
-        // Quita la letra de su posición anterior si ya estaba colocada
         if (placedLetters.includes(letterElement)) {
             const oldIndex = placedLetters.indexOf(letterElement);
             placedLetters[oldIndex] = null;
         }
 
-        // Coloca la letra en su posición correcta
         placedLetters[orderIndex] = letterElement;
         
         // Estilo para acomodar la letra en el contenedor flexbox
-        letterElement.style.position = 'relative'; // Vuelve a ser parte del flujo
+        letterElement.style.position = 'relative'; 
         letterElement.style.top = '0';
         letterElement.style.left = '0';
         letterElement.style.transform = 'none';
         letterElement.style.zIndex = 5; 
         letterElement.classList.add('target-letter');
         
-        // Quitamos los listeners de arrastre cuando la letra está colocada
         letterElement.removeEventListener('mousedown', startDrag);
         letterElement.removeEventListener('touchstart', startDrag);
 

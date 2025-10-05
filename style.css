@@ -217,26 +217,25 @@ body {
     transition: none; 
 }
 
-/* --- MENSAJE DE VICTORIA (IMAGEN PANTALLA COMPLETA) --- */
+/* --- MENSAJE DE VICTORIA (IMAGEN PANTALLA COMPLETA, Z-INDEX FINAL) --- */
 
 #win-message {
     position: absolute;
-    top: 0; /* Ocupa toda la pantalla */
+    top: 0; 
     left: 0;
     width: 100%; 
     height: 100%; 
-    /* Eliminado el background-color y border para que solo se vea la imagen */
-    z-index: 900; 
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    z-index: 999; /* ¡VALOR MÁS ALTO PARA CUBRIR TODO! */
 }
 
 #win-image {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Ajusta la imagen sin cortarla */
+    object-fit: contain; 
     border-radius: 10px;
 }
 

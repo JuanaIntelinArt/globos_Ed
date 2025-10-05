@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
 :root {
     --color-pizarra: #386047; /* Verde pizarra oscura */
     --color-tiza: #ffffff;
@@ -20,7 +22,7 @@ body {
     min-height: 100vh;
     background-color: var(--color-fondo);
     font-family: 'Arial', sans-serif;
-    overflow: hidden; /* Previene barras de desplazamiento */
+    overflow: hidden;
 }
 
 #game-container {
@@ -40,16 +42,17 @@ body {
     left: 50%;
     transform: translateX(-50%);
     font-size: 3em;
-    font-family: 'Permanent Marker', cursive; /* Idealmente una fuente de tiza */
+    font-family: 'Permanent Marker', cursive;
     color: var(--color-tiza);
     opacity: 0.7;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     z-index: 1;
 }
 
+/* AJUSTE DE POSICIÓN MEDIA */
 #target-area {
     position: absolute;
-    bottom: 50px;
+    bottom: 25%; /* Mueve el área objetivo a un nivel medio */
     left: 50%;
     transform: translateX(-50%);
     min-height: 50px;
@@ -63,51 +66,78 @@ body {
     z-index: 5;
 }
 
-/* --- ESTILO DE TORTA --- */
+/* --- ESTILO DE TORTA MEJORADO --- */
 
 #cake-area {
     position: absolute;
-    bottom: 70px;
-    right: 100px; /* Posición cerca de donde van las letras */
+    bottom: 20%; /* Alineado con el área objetivo */
+    right: 10%; 
     z-index: 2;
+    perspective: 1000px; 
 }
 
 .cake {
-    width: 100px;
-    height: 120px;
+    width: 200px;
+    height: 180px;
     position: relative;
-    transform: scale(0.8);
+    transform-style: preserve-3d;
+    transform: rotateX(15deg) rotateY(0deg) rotateZ(-10deg);
 }
 
 .layer {
     width: 100%;
-    height: 30px;
-    background: #ff69b4; /* Rosado */
-    border-radius: 5px;
+    height: 40px;
+    background: #ff69b4;
+    border-radius: 10px;
     position: absolute;
-    box-shadow: 0 5px 0 0 #c71585; /* Cereza oscura */
+    box-shadow: 0 8px 0 0 #c71585, 0 8px 15px rgba(0,0,0,0.4);
+    transform: translateZ(0); 
 }
-.layer-1 { bottom: 0; }
-.layer-2 { bottom: 30px; width: 90%; left: 5%; background: #ff4500; /* Naranja rojizo */ }
-.layer-3 { bottom: 60px; width: 80%; left: 10%; background: #ffd700; /* Dorado */ }
+.layer-1 { 
+    bottom: 0; 
+    background: #ff69b4;
+    box-shadow: 0 8px 0 0 #c71585, 0 8px 15px rgba(0,0,0,0.4), inset 0 -5px 10px rgba(0,0,0,0.2);
+}
+.layer-2 { 
+    bottom: 40px;
+    width: 90%; 
+    left: 5%; 
+    background: #ff4500;
+    box-shadow: 0 8px 0 0 #cd3700, 0 8px 15px rgba(0,0,0,0.4), inset 0 -5px 10px rgba(0,0,0,0.2);
+}
+.layer-3 { 
+    bottom: 80px;
+    width: 80%; 
+    left: 10%; 
+    background: #ffd700;
+    box-shadow: 0 8px 0 0 #ccae00, 0 8px 15px rgba(0,0,0,0.4), inset 0 -5px 10px rgba(0,0,0,0.2);
+}
 
 .candle {
-    width: 5px;
-    height: 25px;
+    width: 8px;
+    height: 35px;
     background: var(--color-tiza);
     position: absolute;
-    top: 30px;
+    top: 60px;
     left: 50%;
     transform: translateX(-50%);
-    border-radius: 2px;
-    box-shadow: 0 0 5px #ffa500;
+    border-radius: 4px;
+    box-shadow: 0 0 10px #ffa500;
+    z-index: 1;
 }
 .candle::after {
     content: '🔥';
     position: absolute;
-    top: -15px;
-    left: -5px;
-    font-size: 1.2em;
+    top: -20px;
+    left: -8px;
+    font-size: 1.8em;
+    animation: flame 0.8s infinite alternate;
+}
+
+@keyframes flame {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    50% { transform: translateY(-2px) scale(1.05); opacity: 0.9; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 
@@ -135,7 +165,6 @@ body {
     z-index: 10;
 }
 
-/* Animación de Flotación */
 @keyframes float {
     0% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(-20px) rotate(2deg); }
@@ -146,11 +175,12 @@ body {
     transform: scale(1.05) translateY(-5px);
 }
 
+/* CAMBIO CLAVE: OCULTA EL TEXTO DEL GLOBO */
 .balloon-content {
-    color: #333;
+    color: var(--color-pizarra); /* Color del texto igual al fondo de la pizarra para ocultarlo */
     font-size: 1.5em;
     font-weight: bold;
-    text-shadow: 1px 1px 2px var(--color-tiza);
+    text-shadow: none; /* Quitamos la sombra para que no se note */
     user-select: none;
 }
 
@@ -163,16 +193,22 @@ body {
 .color-plomo { background-color: var(--color-plomo); }
 .color-mostaza { background-color: var(--color-mostaza); }
 
-/* --- ESTILO DE LETRAS CAÍDAS Y ARRASTRABLES --- */
+/* --- ESTILO DE LETRAS CAÍDAS Y ARRASTRABLES (CON VOLUMEN) --- */
 
 .draggable-letter {
-    position: absolute; /* Inicialmente para la caída */
-    font-size: 2.5em;
+    position: absolute;
+    font-size: 2.8em;
     font-weight: 900;
     color: var(--color-tiza);
     cursor: grab;
-    transition: transform 0.5s ease-out, top 1s ease-in; /* Transición para la caída */
-    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+    transition: transform 0.5s ease-out, top 1s ease-in;
+    /* Volumen de las letras con múltiples text-shadow */
+    text-shadow: 
+        1px 1px 0px rgba(0,0,0,0.5),
+        2px 2px 0px rgba(0,0,0,0.4),
+        3px 3px 0px rgba(0,0,0,0.3),
+        4px 4px 0px rgba(0,0,0,0.2),
+        5px 5px 0px rgba(0,0,0,0.1);
     z-index: 20;
     user-select: none;
     font-family: 'Permanent Marker', cursive;
@@ -184,19 +220,17 @@ body {
 
 .draggable-letter:active {
     cursor: grabbing;
-    z-index: 30; /* Asegura que la letra arrastrada esté encima */
+    z-index: 30;
 }
 
-/* Estilo de la letra en la posición correcta */
 .target-letter {
-    position: relative; /* Cambia a relativo para que se acomode en el flexbox */
+    position: relative;
     cursor: default;
-    /* Se mantienen los otros estilos de fuente y color */
     transform: none !important;
     top: 0 !important;
 }
 
-/* --- MENSAJE DE VICTORIA --- */
+/* --- MENSAJE DE VICTORIA Y IMAGEN --- */
 
 #win-message {
     position: absolute;
@@ -207,17 +241,25 @@ body {
     background-color: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
     font-size: 4em;
-    color: #ff6347; /* Rojo Tomate */
+    color: #ff6347;
     font-weight: bold;
     border: 5px solid #ff4500;
     box-shadow: 0 0 30px #ff4500;
     z-index: 100;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#win-image {
+    max-width: 80%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .hidden {
     display: none;
 }
-
-/* Importar una fuente tipo tiza para mejor estética */
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');

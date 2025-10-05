@@ -13,9 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const balloonArea = document.getElementById('balloon-area');
     const targetArea = document.getElementById('target-area');
     const winMessage = document.getElementById('win-message');
+    const winImage = document.getElementById('win-image'); 
+    const birthdayAudio = document.getElementById('birthday-audio'); 
     const CORRECT_MESSAGE = "Happy Birthday Ed 40!";
-    let placedLetters = Array(balloonData.length).fill(null); // Para rastrear el orden
-    let activeDrag = null; // Elemento que se está arrastrando
+    let placedLetters = Array(balloonData.length).fill(null);
+    let activeDrag = null;
+
+    // Intentar reproducir audio automáticamente
+    birthdayAudio.volume = 0.5;
+    birthdayAudio.play().catch(e => {
+        console.log("No se pudo reproducir el audio automáticamente. Requiere interacción del usuario.", e);
+        // Si falla, el usuario escuchará el audio al interactuar con la página
+    });
+
 
     /**
      * Función para crear y posicionar un globo.
@@ -26,14 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
         balloon.dataset.text = data.text;
         balloon.dataset.order = data.correctOrder;
 
-        // Posición aleatoria (75% del ancho para dejar espacio, 40% de alto para evitar la pizarra)
-        const x = Math.random() * 75 + 5; // 5% a 80%
-        const y = Math.random() * 40 + 5; // 5% a 45%
+        // Posición aleatoria
+        const x = Math.random() * 75 + 5; 
+        const y = Math.random() * 40 + 5; 
 
         balloon.style.left = `${x}vw`;
         balloon.style.top = `${y}vh`;
 
-        // Contenido del globo
+        // Contenido del globo (texto oculto por CSS)
         const content = document.createElement('div');
         content.classList.add('balloon-content');
         content.textContent = data.text;
@@ -51,15 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function dropLetter(balloon, text) {
         if (!balloon.classList.contains('popped')) {
             balloon.classList.add('popped');
-            balloon.style.display = 'none'; // Oculta el globo
+            balloon.style.display = 'none';
             
             const rect = balloon.getBoundingClientRect();
 
             const letter = document.createElement('div');
             letter.classList.add('draggable-letter', 'dropping');
             letter.textContent = text;
-            letter.dataset.text = balloon.dataset.text; // Guarda el texto para el chequeo final
-            letter.dataset.order = balloon.dataset.order; // Guarda el orden correcto
+            letter.dataset.text = balloon.dataset.text;
+            letter.dataset.order = balloon.dataset.order;
 
             // Posición inicial de la letra caída (donde estaba el globo)
             letter.style.left = `${rect.left}px`;
@@ -67,14 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.body.appendChild(letter);
             
-            // Animación de caída: forzar un reflow antes de cambiar la posición final
+            // Animación de caída
             setTimeout(() => {
-                // Caída fluida: mueve la letra hacia el centro vertical del targetArea
+                // Leer la posición real del targetArea (que está ahora a altura media)
                 const targetRect = targetArea.getBoundingClientRect();
-                const dropY = targetRect.top - letter.offsetHeight; // Cae justo encima del target
+                
+                // La letra cae justo encima de la línea punteada del targetArea
+                const dropY = targetRect.top - letter.offsetHeight; 
 
                 letter.style.top = `${dropY}px`;
-                letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)'; // Animación de caída (lenta al inicio, rápida al final)
+                letter.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)';
                 letter.style.zIndex = 20;
 
                 // Después de la caída, habilitar el arrastre
@@ -82,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     letter.classList.remove('dropping');
                     makeDraggable(letter);
                 }, { once: true });
-            }, 50); // Pequeño delay para asegurar que el CSS de la posición inicial se aplique
+            }, 50); 
         }
     }
 
@@ -99,14 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const element = e.currentTarget;
         activeDrag = element;
-        element.style.position = 'absolute'; // Necesario para arrastrar libremente
-        element.style.zIndex = 30; // Mover al frente
+        element.style.position = 'absolute'; 
+        element.style.zIndex = 30; 
         
-        // Determinar coordenadas iniciales
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
         
-        // Calcular el desplazamiento (offset) del cursor dentro del elemento
         element.offsetX = clientX - element.getBoundingClientRect().left;
         element.offsetY = clientY - element.getBoundingClientRect().top;
         
@@ -121,9 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.clientY || e.touches[0].clientY;
+        const clientY = e.touches[0].clientY;
         
-        // Mover el elemento a la nueva posición del cursor menos el offset
         activeDrag.style.left = `${clientX - activeDrag.offsetX}px`;
         activeDrag.style.top = `${clientY - activeDrag.offsetY}px`;
     }
@@ -131,11 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function endDrag(e) {
         if (!activeDrag) return;
         
-        // Revisa si el elemento está sobre el área objetivo (targetArea)
         const targetRect = targetArea.getBoundingClientRect();
         const letterRect = activeDrag.getBoundingClientRect();
 
-        // Chequeo de colisión simple: si la mitad del elemento está sobre el target
+        // Chequeo de colisión simple
         const isOverTarget = (
             letterRect.bottom > targetRect.top &&
             letterRect.top < targetRect.bottom &&
@@ -146,11 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isOverTarget) {
             placeLetterInTarget(activeDrag);
         } else {
-            // Si lo suelta fuera, simplemente se detiene el arrastre (queda donde lo soltó)
             activeDrag.style.zIndex = 20;
         }
 
-        // Limpiar los listeners de arrastre
+        // Limpiar los listeners
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('mouseup', endDrag);
@@ -164,16 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function placeLetterInTarget(letterElement) {
         const orderIndex = parseInt(letterElement.dataset.order);
         
-        // Si ya hay algo en esa posición, lo removemos para evitar duplicados
+        // Manejo de duplicados
         if (placedLetters.includes(letterElement)) {
             const oldIndex = placedLetters.indexOf(letterElement);
             placedLetters[oldIndex] = null;
         }
 
-        // Colocar la letra en la posición correcta (basado en el índice correcto)
         placedLetters[orderIndex] = letterElement;
         
-        // Ajustar visualmente: eliminar el estilo de arrastre libre
+        // Ajuste visual
         letterElement.style.position = 'relative';
         letterElement.style.top = '0';
         letterElement.style.left = '0';
@@ -181,11 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
         letterElement.style.zIndex = 5;
         letterElement.classList.add('target-letter');
         
-        // Eliminar el evento de arrastre una vez colocada
         letterElement.removeEventListener('mousedown', startDrag);
         letterElement.removeEventListener('touchstart', startDrag);
 
-        // Reconstruir el targetArea en el orden de placedLetters
+        // Reconstruir el targetArea
         targetArea.innerHTML = '';
         placedLetters.forEach(letter => {
             if (letter) {
@@ -205,9 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Solo chequear si tenemos todas las partes
         if (fullMessageArray.length === balloonData.length) {
-            if (currentMessage === CORRECT_MESSAGE.replace(/\s/g, '')) { // Comparar sin espacios si el mensaje de chequeo no los tiene
+            if (currentMessage === CORRECT_MESSAGE.replace(/\s/g, '')) {
                 winMessage.classList.remove('hidden');
+                winImage.classList.remove('hidden');
                 targetArea.style.borderBottom = '3px solid gold';
+                
+                // Opcional: pausar la música
+                // birthdayAudio.pause(); 
             }
         }
     }
